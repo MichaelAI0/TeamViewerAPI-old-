@@ -7,18 +7,20 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-
-  username: <%= ENV['username'] %>
-  password: <%= ENV['password'] %>
-  host: <%= ENV['POSTGRES_HOST'] || 'localhost' %>
+  username: <%= ENV['POSTGRES_USERNAME'] %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>
+  host: <%= ENV['POSTGRES_HOST'] %>
+  port: <%= ENV['POSTGRES_PORT'] %>
 
 development:
   <<: *default
   database: TeamViewer_development
+  url: <%= ENV['DEV_DATABASE_URL'] %>
 
 test:
   <<: *default
   database: TeamViewer_test
+  url: <%= ENV['TEST_DATABASE_URL'] %>
 
 production:
   <<: *default
