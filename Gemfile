@@ -12,6 +12,9 @@ gem 'pg', '~> 1.5', '>= 1.5.3'
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 5.0"
 
+# Specify version, per dependabot
+gem 'activesupport', '>= 6.1.3.1'
+
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
 
@@ -36,7 +39,6 @@ gem "bootsnap", require: false
 
 # ======================== RACK GEMS =======================
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
-
 gem 'rack-attack'
 gem "rack-cors"
 
@@ -56,6 +58,8 @@ group :development, :test do
 end
 
 group :development do
+  gem 'annotate'
+  gem 'listen', '~> 3.3'
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   gem "spring"
 end
