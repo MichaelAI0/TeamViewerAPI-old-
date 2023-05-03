@@ -46,7 +46,6 @@ gem "rack-cors"
 gem 'sidekiq'
 gem 'sidekiq-scheduler'
 
-
 # ======================== JSON Serialization Gems ========================
 gem 'blueprinter'
 gem 'oj'
