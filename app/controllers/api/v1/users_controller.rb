@@ -7,14 +7,13 @@ module Api
       before_action :authenticate_request, except: %i[login create]
 
       def login
-        result = TeamApi::Auth.login(params[:email], params[:password], @ip)
+        result = TeamApi::Auth.login(params[:email], params[:password])
         unless result.success?
           render_error(errors: "User not authenticated", status: 401) and return
         end
 
         payload = {
           user: UserBlueprint.render_as_hash(result.payload[:user], view: :login),
-          token: TokenBlueprint.render_as_hash(result.payload[:token]),
           status: 200
         }
         render_success(payload: payload)
@@ -22,7 +21,7 @@ module Api
 #TODO: Lee - this is happening here
       def logout
         if current_user.present?
-          result = TeamApi::Auth.logout(current_user, current_token)
+          result = TeamApi::Auth.logout(@current_user, current_token)
           unless result.success?
             render_error(errors: "There was a problem logging out", status: 401) and return
           end
@@ -49,11 +48,11 @@ module Api
       end
 
       def me
-        render_success(payload: UserBlueprint.render_as_hash(current_user), status: 200)
+        render_success(payload: UserBlueprint.render_as_hash(@current_user), status: 200)
       end
 
       def update
-        result = TeamApi::Users.update_user(current_user.id, user_params)
+        result = TeamApi::Users.update_user(@current_user.id, user_params)
         unless result.success?
           render_error(errors: "There was a problem updating the user", status: 400) and return
         end

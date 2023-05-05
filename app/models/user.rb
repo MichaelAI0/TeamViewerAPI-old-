@@ -4,10 +4,8 @@ class User < ApplicationRecord
   has_many :tokens
 
   def generate_token!(ip)
-    payload = { user_id: id, ip: ip }
-    token = JWT.encode(payload, TeamApi::AccessToken::SECRET_KEY, "HS256")
     Token.create(
-      value: token,
+      value: TeamApi::AccessToken.generate(self),
       user_id: id,
       expiry: DateTime.current + 7.days,
       ip: ip

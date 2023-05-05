@@ -2,11 +2,10 @@ require "jwt"
 
 module TeamApi
   module AccessToken
-    SECRET_KEY = ENV["SECRET_KEY"]
+    SECRET_KEY = Rails.application.credentials['SECRET_KEY']
 
-    def self.generate(model)
-      payload = { model_type: model.class.name, model_id: model.id }
-      JWT.encode(payload, SECRET_KEY, "HS256")
+    def self.generate(payload, ecdsa_key)
+      token = JWT.encode payload, ecdsa_key, 'ES256'
     end
 
     def self.verify(token)
@@ -14,6 +13,11 @@ module TeamApi
     rescue JWT::VerificationError, JWT::DecodeError
       nil
     end
+
+    def self.model_info(model)
+      "#{model}-#{model.id}-#{model.created_at}"
+    end
+    
   end
 end
 #TODO: Lee - this is happening here

@@ -1,31 +1,27 @@
 require "jwt"
 
+
 module TeamApi
   # Handles user authentication (login, logout)
   module Auth
-    def self.login(email, password, ip)
-      # will return nil if no user found, will return false if the try authenticate doesn't work
-      user = User.find_by(email: email).try(:authenticate, password)
+    
+    def self.login(email, password)
 
-      # If we couldn't find the user
-      return ServiceContract.error("User not found") if user.nil?
+      # will return nil if no user found, will return false if the try authenticate doesn't work
+      @curent_user = User.find_by_email(email)
+      if @current_user&.authenticate(password)
+        token = JsonWebToken.jwt_encode(user_id: @current_user.id)
+        ServiceContract.success({ user: @current_user, token: token })
+      else
+            # If we couldn't find the user
+      return ServiceContract.error("User not found") if  @curent_user.nil?
 
       # If the password wasn't correct
-      return ServiceContract.error("Incorrect password") unless user
+      return ServiceContract.error("Incorrect password") unless  @curent_user
+      end
+  
 
-      # generate the JWT token for the user
-      token = JWT.encode({ user_id: user.id }, ENV.fetch("SECRET_KEY"), "HS256")
-#TODO: Lee - this is happening here
-      # create a token record in the database
-      token_obj =
-        Token.create(
-          value: token,
-          user_id: user.id,
-          expiry: DateTime.current + 7.days,
-          ip: ip
-        )
-
-      ServiceContract.success({ user: user, token: token_obj })
+    
     end
 
     def self.logout(user, token)

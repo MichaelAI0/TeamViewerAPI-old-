@@ -1,32 +1,54 @@
-# require "jwt"
+# # app/lib/auth0_client.rb
 
-# module TeamApi
-#   module JwtToken
-#     SECRET_KEY = "your_secret_key"
+# # frozen_string_literal: true
 
-#     def self.generate(model)
-#       payload = { model_info: model_info(model), random_day: random_day.to_i }
+# require 'jwt'
+# require 'net/http'
 
-#       JWT.encode(payload, SECRET_KEY, "HS256")
+# class Auth0Client 
+
+#   # Auth0 Client Objects 
+#   Error = Struct.new(:message, :status)
+#   Response = Struct.new(:decoded_token, :error)
+
+#   # Helper Functions 
+#   def self.domain_url
+#     "https://#{Rails.configuration.auth0.domain}/"
+#   end
+
+#   def self.decode_token(token, jwks_hash)
+#     JWT.decode(token, nil, true, {
+#                  algorithm: 'RS256',
+#                  iss: domain_url,
+#                  verify_iss: true,
+#                  aud: Rails.configuration.auth0.audience,
+#                  verify_aud: true,
+#                  jwks: { keys: jwks_hash[:keys] }
+#                })
+#   end
+
+#   def self.get_jwks
+#     jwks_uri = URI("#{domain_url}.well-known/jwks.json")
+#     Net::HTTP.get_response jwks_uri
+#   end
+
+#   # Token Validation 
+#   def self.validate_token(token)
+#     jwks_response = get_jwks
+
+#     unless jwks_response.is_a? Net::HTTPSuccess
+#       error = Error.new(message: 'Unable to verify credentials', status: :internal_server_error)
+#       return Response.new(nil, error)
 #     end
 
-#     def self.decode(token)
-#       decoded_token =
-#         JWT.decode(token, SECRET_KEY, true, { algorithm: "HS256" }).first
-#       HashWithIndifferentAccess.new(decoded_token)
-#     rescue JWT::ExpiredSignature, JWT::VerificationError => e
-#       raise Api::Unauthorized, e.message
-#     end
+#     jwks_hash = JSON.parse(jwks_response.body).deep_symbolize_keys
 
-#     private
+#     decoded_token = decode_token(token, jwks_hash)
 
-#     def self.model_info(model)
-#       "#{model}-#{model.id}-#{model.created_at}"
-#     end
-
-#     def self.random_day
-#       rand(-200..200).days.ago
-#     end
+#     Response.new(decoded_token, nil)
+#   rescue JWT::VerificationError, JWT::DecodeError => e
+#     error = Error.new('Bad credentials', :unauthorized)
+#     Response.new(nil, error)
 #   end
 # end
-# #TODO: Lee - this is happening here
+# # #TODO: Lee - this is happening here
